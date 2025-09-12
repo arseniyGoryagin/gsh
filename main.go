@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
-	"os"	
+	"fmt"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 func main(){
@@ -17,9 +19,20 @@ func main(){
 		fmt.Print("> ")
 
 		text, _ := reader.ReadString('\n')
+		trimmedText := strings.Trim(text, "\n")
+		splitText := strings.Split(trimmedText," ")
+		command := splitText[0]
+		args := splitText[1:]
 
-		fmt.Print(text)
+		out, err := exec.Command(command, args...).Output()
 
+		if(err != nil){
+			fmt.Println(err)
+		}
+
+		stringOutput := string(out)
+
+		fmt.Println(strings.Trim(stringOutput, "\n"))
 	}
 
 }
