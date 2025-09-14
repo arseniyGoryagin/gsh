@@ -55,14 +55,14 @@ func main() {
 
 		command, args := parseInputText(textInput)
 
-		var redirecttoFilename string
+		var redirectToFilename string
 
 		argsEnd := len(args)
 
 		for i, arg := range args {
 
 			if isRedirectOutPutArg(arg) {
-				redirecttoFilename = args[i+1]
+				redirectToFilename = args[i+1]
 				argsEnd = i
 				break;
 			}
@@ -78,12 +78,12 @@ func main() {
 
 		textOutPut := parseExecOutput(out)
 
-		if redirecttoFilename  == "" {
+		if redirectToFilename  == "" {
 			fmt.Println(textOutPut)
 			continue
 		}
 
-		file, err := openFile(redirecttoFilename)
+		file, err := openFile(redirectToFilename)
 
 		if err != nil {
 			fmt.Println("Error writing to file")
