@@ -8,7 +8,35 @@ import (
 	"strings"
 )
 
-func main(){
+const REDIRECT_ARG = ">f"
+
+func isRedirectOutPutArg(arg string) bool {
+	return arg == REDIRECT_ARG
+}
+
+func parseInputText(text string) (string, []string) {
+	trimmedText := strings.Trim(text, "\n")
+	splitText := strings.Split(trimmedText, " ")
+	command := splitText[0]
+	args := splitText[1:]
+	return command, args
+}
+
+func parseExecOutput(output []byte) string {
+	stringOutput := string(output)
+	return strings.Trim(stringOutput, "\n")
+}
+
+func openFile(filename string) (*os.File, error){
+	return os.Create(filename)
+}
+
+func writeToFile(file *os.File, data string){
+	file.WriteString(data)
+	file.Sync()
+}
+
+func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -18,21 +46,53 @@ func main(){
 
 		fmt.Print("> ")
 
-		text, _ := reader.ReadString('\n')
-		trimmedText := strings.Trim(text, "\n")
-		splitText := strings.Split(trimmedText," ")
-		command := splitText[0]
-		args := splitText[1:]
+		textInput, err := reader.ReadString('\n')
 
-		out, err := exec.Command(command, args...).Output()
-
-		if(err != nil){
-			fmt.Println(err)
+		if err != nil {
+			fmt.Println("Error reading input")
+			continue
 		}
 
-		stringOutput := string(out)
+		command, args := parseInputText(textInput)
 
-		fmt.Println(strings.Trim(stringOutput, "\n"))
+		var redirecttoFilename string
+
+		argsEnd := len(args)
+
+		for i, arg := range args {
+
+			if isRedirectOutPutArg(arg) {
+				redirecttoFilename = args[i+1]
+				argsEnd = i
+				break;
+			}
+
+		}
+
+		out, err := exec.Command(command, args[0:argsEnd]...).Output()
+
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		textOutPut := parseExecOutput(out)
+
+		if redirecttoFilename  == "" {
+			fmt.Println(textOutPut)
+		}
+
+		file, err := openFile(redirecttoFilename)
+
+		if err != nil {
+			fmt.Println("Error writing to file")
+			continue
+		}
+
+		writeToFile(file, textOutPut)
+
+		file.Close()
+
 	}
 
 }
