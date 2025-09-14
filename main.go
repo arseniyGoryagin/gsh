@@ -80,6 +80,7 @@ func main() {
 
 		if redirecttoFilename  == "" {
 			fmt.Println(textOutPut)
+			continue
 		}
 
 		file, err := openFile(redirecttoFilename)
